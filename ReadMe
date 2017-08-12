@@ -1,0 +1,9 @@
+修改配置文件testMysql.conf
+修改对应的登录数据库用户名和密码
+其他配置项自行修改即可
+
+执行make生成可执行文件testMysql
+运行./testMysql即可
+
+如何编译错误可能是没有安装对应mysql的库
+sudo apt-get install libmysqlclient-dev即可
