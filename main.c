@@ -210,25 +210,29 @@ void* threadFuncInsert(void *arg)
 	for(i = 0; i < insertNum; i++)
 	{
 		int num = rand()%1000000000;
+		memset(randNum, 0, 20);
 		IntToStr(randNum, num);
 		sprintf(insert, "%s %s)", insertStr1, randNum);
 		if(mysql_real_query(mysqlConnect, insert, strlen(insert)) != 0)
 		{
-			printf("insert failed: %s\n", mysql_error(mysqlConnect));
+			printf("%s\n", insert);
+			printf("insert1 failed: %s\n", mysql_error(mysqlConnect));
 		}
 		num = rand()%1000000000;
+		memset(randNum, 0, 20);
 		IntToStr(randNum, num);
 		sprintf(insert, "%s %s)", insertStr2, randNum);
 		if(mysql_real_query(mysqlConnect, insert, strlen(insert)) != 0)
 		{
-			printf("insert failed: %s\n", mysql_error(mysqlConnect));
+			printf("insert2 failed: %s\n", mysql_error(mysqlConnect));
 		} 
 		num = rand()%1000000000;
+		memset(randNum, 0, 20);
 		IntToStr(randNum, num);
 		sprintf(insert, "%s %s)", insertStr3, randNum);
 		if(mysql_real_query(mysqlConnect, insert, strlen(insert)) != 0)
 		{
-			printf("insert failed: %s\n", mysql_error(mysqlConnect));
+			printf("insert3 failed: %s\n", mysql_error(mysqlConnect));
 		} 
 	}
 		
@@ -256,6 +260,7 @@ void* threadFuncUpdate(void *arg)
 	for(i = 0; i < updateNum; i++)
 	{
 		int num = rand()%1000000000;
+		memset(randNum, 0, 20);
 		IntToStr(randNum, num);
 		sprintf(update, "%s%s", updateStr, randNum);
 		if(mysql_real_query(mysqlConnect, update, strlen(update)) != 0)
@@ -289,6 +294,7 @@ void* threadFuncSelect(void *arg)
 	for(i = 0; i < selectNum; i++)
 	{
 		int num = rand()%1000000000;
+		memset(randNum, 0, 20);
 		IntToStr(randNum, num);
 		sprintf(select, "%s%s", selectStr, randNum);
 		if(mysql_real_query(mysqlConnect, select, strlen(select)) != 0)
@@ -333,6 +339,7 @@ void* threadFuncDelete(void *arg)
 	for(i = 0; i < deleteNum; i++)
 	{
 		int num = rand()%1000000000;
+		memset(randNum, 0, 20);
 		IntToStr(randNum, num);
 		sprintf(delete, "%s%s", deleteStr, randNum);
 		if(mysql_real_query(mysqlConnect, delete, strlen(delete)) != 0)
