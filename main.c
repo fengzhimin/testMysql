@@ -30,12 +30,12 @@ char createTableStr3[] = "create table stu3(name varchar(30), stunum int)";
 char deleteTableStr1[] = "drop table stu1";
 char deleteTableStr2[] = "drop table stu2";
 char deleteTableStr3[] = "drop table stu3";
-char selectStr[] = "select * from stu1 where stunum=";
+char selectStr[] = "select * from stu1 where stunum like '";
 char insertStr1[] = "insert into stu1 value('insert', ";
 char insertStr2[] = "insert into stu2 value('insert', ";
 char insertStr3[] = "insert into stu3 value('insert', ";
-char updateStr[] = "update stu2 set name='update' where stunum=";
-char deleteStr[] = "delete from stu3 where stunum=";
+char updateStr[] = "update stu2 set name='update' where stunum like '";
+char deleteStr[] = "delete from stu3 where stunum like '";
 
 //创建一个临时表
 void createTable();
@@ -82,19 +82,23 @@ int main(int argc, char *argv[])
 	srand(time(0));
 
 	mysql_library_init(0, NULL, NULL);
-	createTable();
+//	createTable();
 
 	pthread_t *insertThreads = (pthread_t *)malloc(sizeof(pthread_t)*insertThreadNum);
 	pthread_t *updateThreads = (pthread_t *)malloc(sizeof(pthread_t)*updateThreadNum);
 	pthread_t *selectThreads = (pthread_t *)malloc(sizeof(pthread_t)*selectThreadNum);
 	pthread_t *deleteThreads = (pthread_t *)malloc(sizeof(pthread_t)*deleteThreadNum);
 	int i, err;
+/*
 	for(i = 0; i < insertThreadNum; i++)
 	{
 		err = pthread_create(&insertThreads[i], NULL, threadFuncInsert, NULL);
 		if(err != 0)
 			printf("create insertThread failed\n");
 	}
+	for(i = 0; i < insertThreadNum; i++)
+		pthread_join(insertThreads[i], NULL);
+*/
 	for(i = 0; i < updateThreadNum; i++)
 	{
 		err = pthread_create(&updateThreads[i], NULL, threadFuncUpdate, NULL);
@@ -114,8 +118,6 @@ int main(int argc, char *argv[])
 			printf("create deleteThread failed\n");
 	}
 
-	for(i = 0; i < insertThreadNum; i++)
-		pthread_join(insertThreads[i], NULL);
 	for(i = 0; i < updateThreadNum; i++)
 		pthread_join(updateThreads[i], NULL);
 	for(i = 0; i < selectThreadNum; i++)
@@ -123,7 +125,7 @@ int main(int argc, char *argv[])
 	for(i = 0; i < deleteThreadNum; i++)
 		pthread_join(deleteThreads[i], NULL);
 
-	deleteTable();
+//	deleteTable();
 	mysql_library_end();
 	free(insertThreads);
 	free(updateThreads);
@@ -209,7 +211,7 @@ void* threadFuncInsert(void *arg)
 	int i;
 	for(i = 0; i < insertNum; i++)
 	{
-		int num = rand()%1000000000;
+		int num = rand()%1000000;
 		memset(randNum, 0, 20);
 		IntToStr(randNum, num);
 		sprintf(insert, "%s %s)", insertStr1, randNum);
@@ -218,7 +220,7 @@ void* threadFuncInsert(void *arg)
 			printf("%s\n", insert);
 			printf("insert1 failed: %s\n", mysql_error(mysqlConnect));
 		}
-		num = rand()%1000000000;
+		num = rand()%1000000;
 		memset(randNum, 0, 20);
 		IntToStr(randNum, num);
 		sprintf(insert, "%s %s)", insertStr2, randNum);
@@ -226,7 +228,7 @@ void* threadFuncInsert(void *arg)
 		{
 			printf("insert2 failed: %s\n", mysql_error(mysqlConnect));
 		} 
-		num = rand()%1000000000;
+		num = rand()%1000000;
 		memset(randNum, 0, 20);
 		IntToStr(randNum, num);
 		sprintf(insert, "%s %s)", insertStr3, randNum);
@@ -259,10 +261,10 @@ void* threadFuncUpdate(void *arg)
 	int i;
 	for(i = 0; i < updateNum; i++)
 	{
-		int num = rand()%1000000000;
+		int num = rand()%1000;
 		memset(randNum, 0, 20);
 		IntToStr(randNum, num);
-		sprintf(update, "%s%s", updateStr, randNum);
+		sprintf(update, "%s%%%s%%'", updateStr, randNum);
 		if(mysql_real_query(mysqlConnect, update, strlen(update)) != 0)
 		{
 			printf("update failed: %s\n", mysql_error(mysqlConnect));
@@ -293,10 +295,10 @@ void* threadFuncSelect(void *arg)
 	int i;
 	for(i = 0; i < selectNum; i++)
 	{
-		int num = rand()%1000000000;
+		int num = rand()%1000;
 		memset(randNum, 0, 20);
 		IntToStr(randNum, num);
-		sprintf(select, "%s%s", selectStr, randNum);
+		sprintf(select, "%s%%%s%%' order by stunum desc", selectStr, randNum);
 		if(mysql_real_query(mysqlConnect, select, strlen(select)) != 0)
 		{
 			printf("%s\n", select);
@@ -310,7 +312,13 @@ void* threadFuncSelect(void *arg)
 				printf("select count = %d\n", rownum);
 			if(res_ptr)
 			{
-				while((sqlrow = mysql_fetch_row(res_ptr)));
+				rownum = 0;
+				while((sqlrow = mysql_fetch_row(res_ptr)) != NULL)
+				{
+					rownum += StrToInt(sqlrow[1]);
+				}
+				printf("sum stunum = %d\n", rownum);
+
 				mysql_free_result(res_ptr);
 			}
 		}
@@ -338,10 +346,10 @@ void* threadFuncDelete(void *arg)
 	int i;
 	for(i = 0; i < deleteNum; i++)
 	{
-		int num = rand()%1000000000;
+		int num = rand()%1000;
 		memset(randNum, 0, 20);
 		IntToStr(randNum, num);
-		sprintf(delete, "%s%s", deleteStr, randNum);
+		sprintf(delete, "%s%%%s%%'", deleteStr, randNum);
 		if(mysql_real_query(mysqlConnect, delete, strlen(delete)) != 0)
 		{
 			printf("delete failed: %s\n", mysql_error(mysqlConnect));
