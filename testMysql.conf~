@@ -20,10 +20,10 @@ deleteNum=100
 
 [threadInfo]
 #并行插入个数
-insertThread=50
+insertThread=5
 #并行更新个数
-updateThread=50
+updateThread=5
 #并行查询个数
-selectThread=50
+selectThread=5
 #并行删除个数
 deleteThread=0
